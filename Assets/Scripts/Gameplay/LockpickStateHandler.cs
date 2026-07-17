@@ -249,7 +249,7 @@ namespace SyncBreaker.Gameplay
         {
             if (_lockpick == null)
             {
-                _lockpick = FindFirstObjectByType<LockpickSystem>();
+                _lockpick = FindAnyObjectByType<LockpickSystem>();
                 if (_lockpick == null)
                 {
                     var go = new GameObject("LockpickSystem");
@@ -262,7 +262,7 @@ namespace SyncBreaker.Gameplay
         {
             if (_lockpickUI == null)
             {
-                _lockpickUI = FindFirstObjectByType<LockpickUI>();
+                _lockpickUI = FindAnyObjectByType<LockpickUI>();
                 // Note: LockpickUI should be pre-placed in the scene
                 // on a Canvas. If not found, log a warning.
                 if (_lockpickUI == null)

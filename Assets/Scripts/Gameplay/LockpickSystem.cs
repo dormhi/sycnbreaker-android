@@ -275,6 +275,9 @@ namespace SyncBreaker.Gameplay
             _angularVelocity = Mathf.Lerp(_angularVelocity, _targetAngularVelocity,
                 _angularAcceleration * dt);
 
+            // Apply angular drag (subtle deceleration for realism)
+            _angularVelocity *= Mathf.Pow(_angularDrag, dt);
+
             // Apply rotation
             CursorAngle = (CursorAngle + _angularVelocity * dt) % 360f;
             if (CursorAngle < 0f) CursorAngle += 360f;

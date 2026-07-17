@@ -406,7 +406,7 @@ namespace SyncBreaker.Gameplay
             if (Bar == null)
             {
                 // Try to find existing TimingBar in scene
-                Bar = FindFirstObjectByType<TimingBar>();
+                Bar = FindAnyObjectByType<TimingBar>();
 
                 if (Bar == null)
                 {

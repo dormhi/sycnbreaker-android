@@ -21,12 +21,10 @@ namespace SyncBreaker.Core
         // ── Subsystem References ──
         [Header("Subsystems")]
         public StateManager State { get; private set; }
-
-        // These will be populated as we build each system (Day 2-6)
-        // public LevelManager Levels { get; private set; }
-        // public EnergySystem Energy { get; private set; }
-        // public SoundManager Sound { get; private set; }
-        // public SaveSystem Save { get; private set; }
+        public Gameplay.LevelManager Levels { get; private set; }
+        public Systems.EnergySystem Energy { get; private set; }
+        public Systems.SaveSystem Save { get; private set; }
+        public Gameplay.TouchInputHandler Input { get; private set; }
 
         // ── Global Game Data ──
         [Header("Game Configuration")]
@@ -95,12 +93,22 @@ namespace SyncBreaker.Core
             // State Manager
             State = gameObject.AddComponent<StateManager>();
 
-            // Other subsystems will be added in later days:
-            // Energy = gameObject.AddComponent<EnergySystem>();
-            // Sound = gameObject.AddComponent<SoundManager>();
-            // Save = new SaveSystem();
+            // Level Manager
+            Levels = gameObject.AddComponent<Gameplay.LevelManager>();
 
-            Debug.Log("[GameManager] Subsystems initialized.");
+            // Energy System
+            Energy = gameObject.AddComponent<Systems.EnergySystem>();
+
+            // Input Handler
+            Input = gameObject.AddComponent<Gameplay.TouchInputHandler>();
+
+            // Save System (not a MonoBehaviour)
+            Save = new Systems.SaveSystem();
+
+            // Register all state handlers
+            RegisterStateHandlers();
+
+            Debug.Log("[GameManager] All subsystems initialized.");
         }
 
         // ════════════════════════════════════════
@@ -126,6 +134,75 @@ namespace SyncBreaker.Core
         }
 
         // ════════════════════════════════════════
+        //  STATE HANDLER REGISTRATION
+        // ════════════════════════════════════════
+
+        private void RegisterStateHandlers()
+        {
+            // Level State Handler
+            var levelHandler = GetComponentInChildren<Gameplay.LevelStateHandler>();
+            if (levelHandler == null)
+            {
+                levelHandler = gameObject.AddComponent<Gameplay.LevelStateHandler>();
+            }
+            var gameplayUI = FindAnyObjectByType<UI.GameplayUI>();
+            levelHandler.Initialize(Levels, Input, gameplayUI);
+            State.RegisterState(GameState.Level, levelHandler);
+
+            // Lockpick State Handler
+            var lockpickHandler = GetComponentInChildren<Gameplay.LockpickStateHandler>();
+            if (lockpickHandler == null)
+            {
+                lockpickHandler = gameObject.AddComponent<Gameplay.LockpickStateHandler>();
+            }
+            var lockpickUI = FindAnyObjectByType<UI.LockpickUI>();
+            lockpickHandler.Initialize(Levels, Input);
+            State.RegisterState(GameState.Lockpick, lockpickHandler);
+
+            // Menu State Handler
+            var menuHandler = GetComponentInChildren<Gameplay.MenuStateHandler>();
+            if (menuHandler == null)
+            {
+                menuHandler = gameObject.AddComponent<Gameplay.MenuStateHandler>();
+            }
+            var menuUI = FindAnyObjectByType<UI.MainMenuUI>();
+            menuHandler.Initialize(menuUI);
+            State.RegisterState(GameState.Menu, menuHandler);
+
+            // Hub State Handler
+            var hubHandler = GetComponentInChildren<Gameplay.HubStateHandler>();
+            if (hubHandler == null)
+            {
+                hubHandler = gameObject.AddComponent<Gameplay.HubStateHandler>();
+            }
+            var hubUI = FindAnyObjectByType<UI.HubUI>();
+            hubHandler.Initialize(hubUI, Levels);
+            State.RegisterState(GameState.Hub, hubHandler);
+
+            // Game Over State Handler (handles both GameOver and EndlessOver)
+            var gameOverHandler = GetComponentInChildren<Gameplay.GameOverStateHandler>();
+            if (gameOverHandler == null)
+            {
+                gameOverHandler = gameObject.AddComponent<Gameplay.GameOverStateHandler>();
+            }
+            var gameOverUI = FindAnyObjectByType<UI.GameOverUI>();
+            gameOverHandler.Initialize(gameOverUI);
+            State.RegisterState(GameState.GameOver, gameOverHandler);
+            State.RegisterState(GameState.EndlessOver, gameOverHandler);
+
+            // Endless State Handler
+            var endlessHandler = GetComponentInChildren<Gameplay.EndlessStateHandler>();
+            if (endlessHandler == null)
+            {
+                endlessHandler = gameObject.AddComponent<Gameplay.EndlessStateHandler>();
+            }
+            endlessHandler.Initialize(Levels, Input, gameplayUI);
+            State.RegisterState(GameState.Endless, endlessHandler);
+
+            Debug.Log("[GameManager] All state handlers registered.");
+        }
+
+        // ════════════════════════════════════════
         //  UTILITY
         // ════════════════════════════════════════
 
@@ -146,16 +223,16 @@ namespace SyncBreaker.Core
         {
             if (pauseStatus)
             {
-                // Save when app goes to background
-                // Save?.SaveAll();
+                Save?.SaveSettings();
+                Levels?.SaveProgress();
                 Debug.Log("[GameManager] App paused — data saved.");
             }
         }
 
         private void OnApplicationQuit()
         {
-            // Final save
-            // Save?.SaveAll();
+            Save?.SaveSettings();
+            Levels?.SaveProgress();
             Debug.Log("[GameManager] App quit — data saved.");
         }
     }

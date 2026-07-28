@@ -95,6 +95,10 @@ namespace SyncBreaker.Gameplay
         [Range(0f, 1f)]
         public float shakeIntensity = 0.3f;
 
+        [Header("Visual Theme")]
+        [Tooltip("Visual theme for this level (colors, particles, effects)")]
+        public LevelTheme theme;
+
         // ════════════════════════════════════════
         //  FACTORY — Predefined Level Configurations
         // ════════════════════════════════════════

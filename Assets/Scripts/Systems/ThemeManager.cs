@@ -152,7 +152,8 @@ namespace SyncBreaker.Gameplay
         /// </summary>
         public void ApplyThemeForLevel(int levelIndex)
         {
-            var levelData = LevelManager.GetLevelDataStatic(levelIndex);
+            var levelManager = FindAnyObjectByType<Gameplay.LevelManager>();
+            var levelData = levelManager?.GetLevelData(levelIndex);
             if (levelData?.theme != null)
             {
                 TransitionToTheme(levelData.theme);

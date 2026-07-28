@@ -50,7 +50,9 @@ namespace SyncBreaker.UI
         public event Action OnEndlessSelected;
         public event Action OnBackClicked;
         public event Action OnResetClicked;
+#pragma warning disable CS0067 // Event is used by external state handlers
         public event Action<int> OnLockpickShortcut;
+#pragma warning restore CS0067
 
         private LevelManager _levels;
         private CanvasGroup _canvasGroup;
